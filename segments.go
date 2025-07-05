@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nguyendkn/go-libs/ffmpeg"
+	"github.com/csmart-libs/go-ffmpeg"
 )
 
 // SegmentProcessor handles video segmentation for HLS

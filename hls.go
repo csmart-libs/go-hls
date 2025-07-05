@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/nguyendkn/go-libs/ffmpeg"
+	"github.com/csmart-libs/go-ffmpeg"
 )
 
 // HLS represents the main HLS interface

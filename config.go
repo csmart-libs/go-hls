@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/nguyendkn/go-libs/ffmpeg"
+	"github.com/csmart-libs/go-ffmpeg"
 )
 
 // Config represents HLS conversion configuration
@@ -15,37 +15,37 @@ type Config struct {
 	FFmpeg ffmpeg.FFmpeg `json:"-"`
 
 	// Output settings
-	OutputDir       string        `json:"output_dir"`
-	BaseURL         string        `json:"base_url,omitempty"`
-	PlaylistName    string        `json:"playlist_name"`
-	MasterPlaylist  string        `json:"master_playlist"`
-	
+	OutputDir      string `json:"output_dir"`
+	BaseURL        string `json:"base_url,omitempty"`
+	PlaylistName   string `json:"playlist_name"`
+	MasterPlaylist string `json:"master_playlist"`
+
 	// Format settings
-	Format          HLSFormat     `json:"format"`
-	PlaylistType    PlaylistType  `json:"playlist_type"`
-	
+	Format       HLSFormat    `json:"format"`
+	PlaylistType PlaylistType `json:"playlist_type"`
+
 	// Segment settings
-	SegmentOptions  SegmentOptions `json:"segment_options"`
-	
+	SegmentOptions SegmentOptions `json:"segment_options"`
+
 	// Quality settings
 	QualityLevels   []QualityLevel `json:"quality_levels"`
 	AdaptiveBitrate bool           `json:"adaptive_bitrate"`
-	
+
 	// Encryption settings
-	Encryption      *EncryptionOptions `json:"encryption,omitempty"`
-	
+	Encryption *EncryptionOptions `json:"encryption,omitempty"`
+
 	// Advanced settings
-	Parallel        bool          `json:"parallel"`
-	MaxConcurrent   int           `json:"max_concurrent"`
-	Timeout         time.Duration `json:"timeout"`
-	TempDir         string        `json:"temp_dir"`
-	CleanupTemp     bool          `json:"cleanup_temp"`
-	
+	Parallel      bool          `json:"parallel"`
+	MaxConcurrent int           `json:"max_concurrent"`
+	Timeout       time.Duration `json:"timeout"`
+	TempDir       string        `json:"temp_dir"`
+	CleanupTemp   bool          `json:"cleanup_temp"`
+
 	// Optimization settings
-	FastStart       bool          `json:"fast_start"`
-	TwoPass         bool          `json:"two_pass"`
-	LookAhead       bool          `json:"look_ahead"`
-	
+	FastStart bool `json:"fast_start"`
+	TwoPass   bool `json:"two_pass"`
+	LookAhead bool `json:"look_ahead"`
+
 	// Callback functions
 	ProgressCallback func(ConversionProgress) `json:"-"`
 	ErrorCallback    func(error)              `json:"-"`
@@ -54,21 +54,21 @@ type Config struct {
 // DefaultConfig returns a default HLS configuration
 func DefaultConfig() *Config {
 	return &Config{
-		OutputDir:      "output",
-		PlaylistName:   "playlist.m3u8",
-		MasterPlaylist: "master.m3u8",
-		Format:         FormatHLS,
-		PlaylistType:   PlaylistVOD,
-		SegmentOptions: DefaultSegmentOptions(),
-		QualityLevels:  DefaultQualityLevels,
+		OutputDir:       "output",
+		PlaylistName:    "playlist.m3u8",
+		MasterPlaylist:  "master.m3u8",
+		Format:          FormatHLS,
+		PlaylistType:    PlaylistVOD,
+		SegmentOptions:  DefaultSegmentOptions(),
+		QualityLevels:   DefaultQualityLevels,
 		AdaptiveBitrate: true,
-		Parallel:       true,
-		MaxConcurrent:  4,
-		Timeout:        30 * time.Minute,
-		CleanupTemp:    true,
-		FastStart:      true,
-		TwoPass:        false,
-		LookAhead:      true,
+		Parallel:        true,
+		MaxConcurrent:   4,
+		Timeout:         30 * time.Minute,
+		CleanupTemp:     true,
+		FastStart:       true,
+		TwoPass:         false,
+		LookAhead:       true,
 	}
 }
 
@@ -213,12 +213,12 @@ func (c *Config) GetSegmentPattern(qualityName string) string {
 	if c.SegmentOptions.Pattern == "" {
 		return "segment_%03d.ts"
 	}
-	
+
 	// Add quality prefix if adaptive bitrate
 	if c.AdaptiveBitrate {
 		return c.SegmentOptions.Pattern
 	}
-	
+
 	// Add quality prefix to pattern
 	ext := filepath.Ext(c.SegmentOptions.Pattern)
 	base := c.SegmentOptions.Pattern[:len(c.SegmentOptions.Pattern)-len(ext)]
@@ -228,17 +228,17 @@ func (c *Config) GetSegmentPattern(qualityName string) string {
 // Clone creates a deep copy of the configuration
 func (c *Config) Clone() *Config {
 	clone := *c
-	
+
 	// Deep copy quality levels
 	clone.QualityLevels = make([]QualityLevel, len(c.QualityLevels))
 	copy(clone.QualityLevels, c.QualityLevels)
-	
+
 	// Deep copy encryption options if present
 	if c.Encryption != nil {
 		encryption := *c.Encryption
 		clone.Encryption = &encryption
 	}
-	
+
 	return &clone
 }
 

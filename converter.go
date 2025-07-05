@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/nguyendkn/go-libs/ffmpeg"
+	"github.com/csmart-libs/go-ffmpeg"
 )
 
 // Converter is the main HLS converter implementation
@@ -42,7 +42,7 @@ func (c *Converter) Convert(ctx context.Context, inputFile string) (*ConversionR
 	defer c.mutex.Unlock()
 
 	startTime := time.Now()
-	
+
 	// Initialize result
 	result := &ConversionResult{
 		OutputDir:     c.config.OutputDir,
@@ -144,7 +144,7 @@ func (c *Converter) convertParallel(ctx context.Context, inputFile string, resul
 		wg.Add(1)
 		go func(ql QualityLevel, index int) {
 			defer wg.Done()
-			
+
 			// Acquire semaphore
 			semaphore <- struct{}{}
 			defer func() { <-semaphore }()
@@ -174,7 +174,7 @@ func (c *Converter) processQualityLevel(ctx context.Context, inputFile string, q
 	progressCallback := func(progress ConversionProgress) {
 		if c.config.ProgressCallback != nil {
 			// Adjust progress for multiple quality levels
-			overallProgress := (float64(index)/float64(total))*100 + (progress.Progress/float64(total))
+			overallProgress := (float64(index)/float64(total))*100 + (progress.Progress / float64(total))
 			progress.Progress = overallProgress
 			c.config.ProgressCallback(progress)
 		}
@@ -221,7 +221,7 @@ func (c *Converter) updateResult(result *ConversionResult, qualityLevel QualityL
 func (c *Converter) ConvertWithOptions(ctx context.Context, inputFile string, options *ConversionOptions) (*ConversionResult, error) {
 	// Create a copy of config with custom options
 	config := c.config.Clone()
-	
+
 	if options != nil {
 		// Apply custom options
 		if options.QualityLevels != nil {
@@ -268,7 +268,7 @@ func (c *Converter) ConvertLive(ctx context.Context, inputSource string) error {
 	if c.config.Parallel {
 		return c.convertLiveParallel(ctx, inputSource)
 	}
-	
+
 	return c.convertLiveSequential(ctx, inputSource)
 }
 
@@ -279,7 +279,7 @@ func (c *Converter) convertLiveSequential(ctx context.Context, inputSource strin
 			c.processLiveQualityLevel(ctx, inputSource, ql)
 		}(qualityLevel)
 	}
-	
+
 	// Wait for context cancellation
 	<-ctx.Done()
 	return ctx.Err()
@@ -288,7 +288,7 @@ func (c *Converter) convertLiveSequential(ctx context.Context, inputSource strin
 // convertLiveParallel processes live stream in parallel
 func (c *Converter) convertLiveParallel(ctx context.Context, inputSource string) error {
 	var wg sync.WaitGroup
-	
+
 	for _, qualityLevel := range c.config.QualityLevels {
 		wg.Add(1)
 		go func(ql QualityLevel) {
@@ -296,7 +296,7 @@ func (c *Converter) convertLiveParallel(ctx context.Context, inputSource string)
 			c.processLiveQualityLevel(ctx, inputSource, ql)
 		}(qualityLevel)
 	}
-	
+
 	wg.Wait()
 	return nil
 }
@@ -305,10 +305,10 @@ func (c *Converter) convertLiveParallel(ctx context.Context, inputSource string)
 func (c *Converter) processLiveQualityLevel(ctx context.Context, inputSource string, qualityLevel QualityLevel) {
 	// Implementation for live streaming would be more complex
 	// This is a simplified version
-	
+
 	outputDir := c.config.GetQualityOutputDir(qualityLevel.Name)
 	segmentPattern := c.config.GetSegmentPattern(qualityLevel.Name)
-	
+
 	builder := c.ffmpeg.New().
 		Input(inputSource).
 		VideoCodec(qualityLevel.VideoCodec).
@@ -316,13 +316,13 @@ func (c *Converter) processLiveQualityLevel(ctx context.Context, inputSource str
 		Resolution(qualityLevel.Resolution).
 		VideoBitrate(qualityLevel.VideoBitrate).
 		AudioBitrate(qualityLevel.AudioBitrate)
-	
+
 	if qualityLevel.FrameRate > 0 {
 		builder = builder.FrameRate(qualityLevel.FrameRate)
 	}
-	
+
 	builder = c.segmentProcessor.addHLSOptions(builder, outputDir, segmentPattern, qualityLevel)
-	
+
 	// Execute live conversion
 	builder.Execute(ctx)
 }
@@ -351,7 +351,7 @@ func (c *Converter) validateInput(inputFile string) error {
 // calculateOutputSize calculates the total size of output files
 func (c *Converter) calculateOutputSize() (int64, error) {
 	var totalSize int64
-	
+
 	err := filepath.Walk(c.config.OutputDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -361,7 +361,7 @@ func (c *Converter) calculateOutputSize() (int64, error) {
 		}
 		return nil
 	})
-	
+
 	return totalSize, err
 }
 
@@ -395,13 +395,13 @@ func (c *Converter) UpdateConfig(config *Config) error {
 	if err := config.Validate(); err != nil {
 		return err
 	}
-	
+
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
-	
+
 	c.config = config
 	c.segmentProcessor = NewSegmentProcessor(config)
 	c.playlistManager = NewPlaylistManager(config)
-	
+
 	return nil
 }

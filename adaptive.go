@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/nguyendkn/go-libs/ffmpeg"
+	"github.com/csmart-libs/go-ffmpeg"
 )
 
 // AdaptiveStreaming handles adaptive bitrate streaming functionality
@@ -43,7 +43,7 @@ func (as *AdaptiveStreaming) GenerateAdaptiveStream(ctx context.Context, inputFi
 
 	// Generate quality levels based on input
 	qualityLevels := as.generateQualityLevels(inputInfo)
-	
+
 	// Update config with generated quality levels
 	config := as.config.Clone()
 	config.QualityLevels = qualityLevels
@@ -115,7 +115,7 @@ func (as *AdaptiveStreaming) createQualityLevel(name string, width, height int, 
 	var audioBitrate int64
 	switch {
 	case videoBitrate < 500000:
-		audioBitrate = 64000  // 64kbps for low quality
+		audioBitrate = 64000 // 64kbps for low quality
 	case videoBitrate < 2000000:
 		audioBitrate = 128000 // 128kbps for medium quality
 	default:
@@ -151,7 +151,7 @@ func (as *AdaptiveStreaming) OptimizeQualityLevels(levels []QualityLevel) []Qual
 
 	for _, level := range levels {
 		currentBitrate := as.getBitrateValue(level.VideoBitrate)
-		
+
 		// Ensure minimum bitrate difference (at least 50% increase)
 		if lastBitrate == 0 || currentBitrate >= lastBitrate*3/2 {
 			optimized = append(optimized, level)
@@ -329,8 +329,8 @@ func (as *AdaptiveStreaming) GetBandwidthLadder(levels []QualityLevel) []Bandwid
 		totalBandwidth := videoBitrate + audioBitrate
 
 		ladder = append(ladder, BandwidthLevel{
-			Name:      level.Name,
-			Bandwidth: totalBandwidth,
+			Name:       level.Name,
+			Bandwidth:  totalBandwidth,
 			Resolution: string(level.Resolution),
 			VideoCodec: string(level.VideoCodec),
 			AudioCodec: string(level.AudioCodec),
@@ -367,7 +367,7 @@ func (as *AdaptiveStreaming) AnalyzeOptimalLevels(inputFile string) ([]QualityLe
 
 	// Generate levels based on input characteristics
 	levels := as.generateQualityLevels(inputInfo)
-	
+
 	// Optimize the levels
 	optimized := as.OptimizeQualityLevels(levels)
 
